@@ -563,8 +563,8 @@
             </div>
 
             <!-- Names (Reduced Spacing) -->
-            <div class="reveal-content z-20 mt-6 flex flex-col items-center gap-0">
-                <p class="font-royal tracking-widest text-maroon text-lg mb-2">Celebrating THE Divine Union of</p>
+            <div class="reveal-content z-20 mt-6 flex flex-col items-center gap-0 w-full px-4 text-center">
+                <p class="font-royal tracking-wider md:tracking-widest text-maroon text-base md:text-lg mb-2">Celebrating the Divine Union of</p>
                 <div class="font-name text-maroon flex flex-col items-center justify-center gap-2 md:gap-4"
                     style="text-shadow: 1px 1px 3px rgba(0,0,0,0.2); line-height: 1.2;">
                     <span style="font-size: 1em;">Khushbu</span>
@@ -578,6 +578,14 @@
                 <div class="inline-block border-t border-b border-gold py-2 px-6 mt-6 bg-white bg-opacity-50">
                     <p class="font-royal text-2xl tracking-widest text-maroon font-bold">Friday, 8th May 2026</p>
                 </div>
+
+                <!-- Invitation Video Button -->
+                <button onclick="openVideo()" class="mt-8 px-6 py-3 font-royal tracking-widest uppercase rounded-full shadow-lg hover:scale-105 transition-transform border border-gold flex items-center gap-2" style="background-color: var(--royal-maroon); color: var(--gold);">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                    </svg>
+                    Play Invitation Video
+                </button>
             </div>
 
             <!-- Bottom Peacocks (FULL MALE PEACOCK OPEN TAIL) -->
@@ -626,7 +634,7 @@
                 </div>
 
                 <!-- EVENTS -->
-                <h2 class="section-title w-full">Shubh Vivah</h2>
+                <h2 class="section-title w-full">Vivah Sanskar</h2>
                 <div class="event-card">
                     <!-- <span class="text-4xl mr-4">🪘</span> -->
                     <div>
@@ -670,17 +678,35 @@
         </div>
     </div>
 
+    <!-- VIDEO MODAL -->
+    <div id="video-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-90 p-4">
+        <div class="relative w-full max-w-[90vw] md:max-w-max">
+            <button onclick="closeVideo()" class="absolute -top-12 right-0 text-white hover:text-gold z-50 p-2 md:-right-12 md:top-0">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <video id="invitation-video" class="w-full h-auto max-h-[85vh] rounded-lg shadow-2xl" controls>
+                <source src="WhatsApp Video 2026-04-08 at 11.00.33 AM.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
     <script>
+        // Global reference to track the dynamically created audio so we can pause/play it easily
+        window.dynamicWeddingAudio = null;
+
         // HANDLE ENTRANCE OVERLAY & AUDIO PLAYBACK
         function enterInvitation() {
             const overlay = document.getElementById('entrance-overlay');
 
             // Re-instantiate audio dynamically on click to bypass aggressive blocks
-            let weddingAudio = new Audio("wedding.mp3");
-            weddingAudio.loop = true;
-            weddingAudio.volume = 0.5;
+            window.dynamicWeddingAudio = new Audio("wedding.mp3");
+            window.dynamicWeddingAudio.loop = true;
+            window.dynamicWeddingAudio.volume = 0.5;
 
-            weddingAudio.play().then(() => {
+            window.dynamicWeddingAudio.play().then(() => {
                 console.log("Audio playing successfully.");
             }).catch(e => {
                 console.log("Audio playback was blocked: ", e);
@@ -714,6 +740,48 @@
                 easing: 'ease-in-out',
                 interval: 200 // cascade effect
             });
+        }
+
+        // VIDEO PLAYBACK HANDLERS
+        function openVideo() {
+            const videoModal = document.getElementById('video-modal');
+            const video = document.getElementById('invitation-video');
+            const domAudio = document.getElementById('wedding-audio');
+            
+            // Pause background audio via dynamic instance or dom fallback
+            if(window.dynamicWeddingAudio) window.dynamicWeddingAudio.pause();
+            if(domAudio) domAudio.pause();
+            
+            videoModal.classList.remove('hidden');
+            videoModal.classList.add('flex');
+            video.play();
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideo() {
+            const videoModal = document.getElementById('video-modal');
+            const video = document.getElementById('invitation-video');
+            const domAudio = document.getElementById('wedding-audio');
+            
+            video.pause();
+            video.currentTime = 0;
+            
+            videoModal.classList.add('hidden');
+            videoModal.classList.remove('flex');
+            
+            // Resume background audio if entrance overlay is hidden
+            const overlay = document.getElementById('entrance-overlay');
+            if(overlay.style.visibility === 'hidden') {
+                if(window.dynamicWeddingAudio) {
+                    window.dynamicWeddingAudio.play().catch(e => console.log('Audio resume blocked:', e));
+                } else if(domAudio && typeof domAudio.play === 'function') {
+                    domAudio.play().catch(e => console.log('Audio resume blocked:', e));
+                }
+            }
+            
+            // Remove inline overflow style
+            document.body.style.overflow = '';
         }
     </script>
 </body>
